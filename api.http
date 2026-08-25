@@ -1,0 +1,40 @@
+### 1. Register / Signup 
+POST http://localhost:9091/api/auth/local/register
+Content-Type: application/json
+
+{
+  "username": "kanyatipat",
+  "email": "kanyatipat-t@rmutp.ac.th",
+  "password": "mix2559za"
+}
+
+### 2. Login User 
+POST http://localhost:9091/api/auth/local
+Content-Type: application/json
+
+{
+  "identifier": "kanyatipat-t@rmutp.ac.th",
+  "password": "mix2559za"
+}
+
+### 3. Login Admin 
+POST http://localhost:9091/admin/login
+Content-Type: application/json
+
+{
+  "email": "kanyatipat-t@rmutp.ac.th",
+  "password": "mix2559za",
+  "rememberMe": false
+}
+
+### 4. Forgot Password 
+POST http://localhost:9091/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "kanyatipat-t@rmutp.ac.th"
+}
+
+### 5. Profile
+GET http://localhost:9091/api/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzg3NjgzODUwLCJleHAiOjE3OTAyNzU4NTB9.YiOu-D1zroNkPK-iXjxm4f1fx8wAe2t5tDyxvl-5RkA
