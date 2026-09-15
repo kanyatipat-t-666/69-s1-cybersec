@@ -32,6 +32,15 @@ Content-Type: application/json
     "email": ""
 }
 
+### 3.1 Reset Password Admin (token ใหม่ล่าสุดจาก email/DB เท่านั้น, single-use)
+POST http://localhost:9091/admin/reset-password
+Content-Type: application/json
+
+{
+    "resetPasswordToken": "",
+    "password": ""
+}
+
 ### 4. Profile Admin
 GET http://localhost:9091/admin/users/me
 Authorization: Bearer {{adminLogin.response.body.data.token}}
@@ -66,6 +75,16 @@ Content-Type: application/json
 
 {
     "email": ""
+}
+
+### 3.1 Reset Password User (code ใหม่ล่าสุดจาก email/DB เท่านั้น, single-use)
+POST http://localhost:9091/api/auth/reset-password
+Content-Type: application/json
+
+{
+    "code": "",
+    "password": "",
+    "passwordConfirmation": ""
 }
 
 ### 4. Profile User
