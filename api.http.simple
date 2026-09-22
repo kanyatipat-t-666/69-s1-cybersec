@@ -21,8 +21,8 @@ Content-Type: application/json
   "lastname": ""
 }
 
-### 1.3 Forgot Password
-###    ตรวจ inbox แล้วก็อป code หลัง ?code= ไปใส่ step 1.3.1
+### 1.3 Forgot Password (สร้าง token -> ส่งเข้า Gmail จริง เห็นได้เลยใน inbox ไม่ต้องรอ)
+###    ตรวจ inbox patipan2559za@gmail.com แล้วก็อป code หลัง ?code= ไปใส่ step 1.3.1
 POST http://localhost:9091/admin/forgot-password
 Content-Type: application/json
 
@@ -32,6 +32,7 @@ Content-Type: application/json
 
 ### 1.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น!)
 ###    field: resetPasswordToken + password (ไม่ต้องมี passwordConfirmation!)
+###    หลัง reset สำเร็จ password admin จะเป็นค่าใน field password
 POST http://localhost:9091/admin/reset-password
 Content-Type: application/json
 
@@ -67,8 +68,8 @@ Content-Type: application/json
   "password": ""
 }
 
-### 2.3 Forgot Password
-###    ตรวจ inbox แล้วก็อป code หลัง ?code= ไปใส่ step 2.3.1
+### 2.3 Forgot Password (สร้าง token -> ส่งเข้า Gmail จริง เห็นได้เลยใน inbox ไม่ต้องรอ)
+###    ตรวจ inbox patipan2559za@gmail.com แล้วก็อป code หลัง ?code= ไปใส่ step 2.3.1
 POST http://localhost:9091/api/auth/forgot-password
 Content-Type: application/json
 
