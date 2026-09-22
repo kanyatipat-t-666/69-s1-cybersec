@@ -2,4 +2,3 @@ data-postgres/
 data-pgadmin/
 data/
 .env
-api.http
