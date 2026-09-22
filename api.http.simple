@@ -1,86 +1,95 @@
-## 1. Admin 
+## 1. Admin
 
 ### 1.1 Login
 POST http://localhost:9091/admin/login
 Content-Type: application/json
 
 {
-  "email": "",
-  "password": "",
+  "email": "patipan2559za@gmail.com",
+  "password": "Mix2259za",
   "rememberMe": false
 }
 
-### 1.2 Signup / Register 
+### 1.2 Signup / Register (custom endpoint => จะสร้าง admin จริง ถ้าจะยิงซ้ำต้องเปลี่ยน email เป็นตัวใหม่)
 POST http://localhost:9091/api/admin/register
 Content-Type: application/json
 
 {
-  "email": "",
-  "password": "",
-  "firstname": "",
-  "lastname": ""
+  "email": "patipan2559za+superadmin@gmail.com",
+  "password": "Mix2259za",
+  "firstname": "Kanyatipat",
+  "lastname": "Thirawatdechawat"
 }
 
-### 1.3 Forgot Password
+### 1.3 Forgot Password (สร้าง token -> ส่งเข้า Gmail จริง เห็นได้เลยใน inbox ไม่ต้องรอ)
+###    ตรวจ inbox patipan2559za@gmail.com แล้วก็อป code หลัง ?code= ไปใส่ step 1.3.1
 POST http://localhost:9091/admin/forgot-password
 Content-Type: application/json
 
 {
-  "email": ""
+  "email": "patipan2559za@gmail.com"
 }
 
-### 1.3.1 Reset Password
+### 1.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น!)
+###    field: resetPasswordToken + password (ไม่ต้องมี passwordConfirmation!)
+###    หลัง reset สำเร็จ password admin จะเป็นค่าใน field password
 POST http://localhost:9091/admin/reset-password
 Content-Type: application/json
 
 {
-  "resetPasswordToken": "",
-  "password": ""
+  "resetPasswordToken": "e16b2e4b04ed4467fe2b8d3c94bcc597c7f1db49",
+  "password": "Mix2259za"
 }
 
-### 1.4 Profile
-GET http://localhost:9091/admin/users/me
-Authorization: Bearer <JWT>
+### 1.3.2 ทดสอบ single-use: ยิงขั้น 1.3.1 ซ้ำด้วย token เดิม -> ได้ 400
 
-## 2. User 
+### 1.4 Profile (ต้อง Login admin ก่อน -> ได้ token แล้วใส่ข้างล่าง)
+GET http://localhost:9091/admin/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzkwMDkyNjU3LCJleHAiOjE3OTI2ODQ2NTd9.Kri6BXWJZUyCBnyFejCK5ceHjRcMTLl_iG_t0HA1GHQ
+
+## 2. User
 
 ### 2.1 Login
 POST http://localhost:9091/api/auth/local
 Content-Type: application/json
 
 {
-  "identifier": "",
-  "password": ""
+  "identifier": "patipan2559za@gmail.com",
+  "password": "Mix2559za"
 }
 
-### 2.2 Signup / Register
+### 2.2 Signup / Register (ทำครั้งแรกเท่านั้น ถ้าจะยิงซ้ำต้องเปลี่ยน email)
 POST http://localhost:9091/api/auth/local/register
 Content-Type: application/json
 
 {
-  "username": "",
-  "email": "",
-  "password": ""
+  "username": "kanyatipat",
+  "email": "patipan2559za@gmail.com",
+  "password": "Mix2559za"
 }
 
-### 2.3 Forgot Password
+### 2.3 Forgot Password (สร้าง token -> ส่งเข้า Gmail จริง เห็นได้เลยใน inbox ไม่ต้องรอ)
+###    ตรวจ inbox patipan2559za@gmail.com แล้วก็อป code หลัง ?code= ไปใส่ step 2.3.1
 POST http://localhost:9091/api/auth/forgot-password
 Content-Type: application/json
 
 {
-  "email": ""
+  "email": "patipan2559za@gmail.com"
 }
 
-### 2.3.1 Reset Password
+### 2.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น!)
+###    field: code + password + passwordConfirmation
 POST http://localhost:9091/api/auth/reset-password
 Content-Type: application/json
 
 {
-  "code": "",
-  "password": "",
-  "passwordConfirmation": ""
+  "code": "0ff7cdb7dd0704d7a843484a86b235b7c34586c52adb3f1c91db6134579381b2a46eedbace67d6f5beb5167bba5885c169978da8508f6908048891194a402377",
+  "password": "Mix2559za",
+  "passwordConfirmation": "Mix2559za"
 }
 
-### 2.4 Profile
+### 2.3.2 ทดสอบ single-use: ยิงขั้น 2.3.1 ซ้ำด้วย code เดิม -> ได้ 400
+
+### 2.4 Profile (Login user -> ได้ JWT ใหม่ แล้วใส่ข้างล่าง)
 GET http://localhost:9091/api/users/me
-Authorization: Bearer <JWT>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzg5NTAwNzY5LCJleHAiOjE3OTIwOTI3Njl9.6nW0zXms2VDX8JMagwB7Aw8jweWA2l1ufdJr5R6iWbY
