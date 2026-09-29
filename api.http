@@ -1,12 +1,17 @@
+### วิธีใช้: กด Send ทีละข้อจากบนลงล่าง (1.1 ต้องก่อนเสมอ)
+###    token และ documentId ดึงอัตโนมัติจาก response ของข้อก่อนหน้า ถ้าข้อไหนยังไม่ได้ Send จะได้ค่าว่างและ error 401/404
+###    ค่าใน {} ไม่ต้องแก้เอง นอกจาก code ที่ 1.3.1 / 2.3.1 ที่ต้องก๊อปจาก Gmail
+
 ## 1. Admin
 
+# @name adminLogin
 ### 1.1 Login
 POST http://localhost:9091/admin/login
 Content-Type: application/json
 
 {
   "email": "patipan2559za@gmail.com",
-  "password": "Mix2259za",
+  "password": "Mix2559zazaza",
   "rememberMe": false
 }
 
@@ -30,32 +35,33 @@ Content-Type: application/json
   "email": "patipan2559za@gmail.com"
 }
 
-### 1.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น!)
+### 1.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น! ค่า token ข้างล่างเป็นค่าเดิมที่ถูกใช้ไปแล้ว -> ต้องก๊อปค่าใหม่จาก Gmail มาแทน ถ้ายิงค่าเดิมจะได้ 400)
 ###    field: resetPasswordToken + password (ไม่ต้องมี passwordConfirmation!)
 ###    หลัง reset สำเร็จ password admin จะเป็นค่าใน field password
 POST http://localhost:9091/admin/reset-password
 Content-Type: application/json
 
 {
-  "resetPasswordToken": "e16b2e4b04ed4467fe2b8d3c94bcc597c7f1db49",
-  "password": "Mix2259za"
+  "resetPasswordToken": "a34d676110fa885f6cd4ae22a28bf0d2d6c95ff7",
+  "password": "Mix2559zazaza"
 }
 
 ### 1.3.2 ทดสอบ single-use: ยิงขั้น 1.3.1 ซ้ำด้วย token เดิม -> ได้ 400
 
-### 1.4 Profile (ต้อง Login admin ก่อน -> ได้ token แล้วใส่ข้างล่าง)
+### 1.4 Profile (ใช้ token จาก 1.1 อัตโนมัติ)
 GET http://localhost:9091/admin/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzkwMDkyNjU3LCJleHAiOjE3OTI2ODQ2NTd9.Kri6BXWJZUyCBnyFejCK5ceHjRcMTLl_iG_t0HA1GHQ
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
 
 ## 2. User
 
+# @name userLogin
 ### 2.1 Login
 POST http://localhost:9091/api/auth/local
 Content-Type: application/json
 
 {
   "identifier": "patipan2559za@gmail.com",
-  "password": "Mix2559za"
+  "password": "Mix2559zazaza"
 }
 
 ### 2.2 Signup / Register (ทำครั้งแรกเท่านั้น ถ้าจะยิงซ้ำต้องเปลี่ยน email)
@@ -77,19 +83,150 @@ Content-Type: application/json
   "email": "patipan2559za@gmail.com"
 }
 
-### 2.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น!)
+### 2.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น! ค่า code ข้างล่างเป็นค่าเดิมที่ถูกใช้ไปแล้ว -> ต้องก๊อปค่าใหม่จาก Gmail มาแทน ถ้ายิงค่าเดิมจะได้ 400)
 ###    field: code + password + passwordConfirmation
 POST http://localhost:9091/api/auth/reset-password
 Content-Type: application/json
 
 {
-  "code": "0ff7cdb7dd0704d7a843484a86b235b7c34586c52adb3f1c91db6134579381b2a46eedbace67d6f5beb5167bba5885c169978da8508f6908048891194a402377",
-  "password": "Mix2559za",
-  "passwordConfirmation": "Mix2559za"
+  "code": "0aaf94d27a5f2b0474a11521170eccddb309453f0c38319592a73ac88f4843e889fdf006a906be1365253f3aa6edf2be22016f7a918b1ba8cc4274f61dba7e98",
+  "password": "Mix2559zazaza",
+  "passwordConfirmation": "Mix2559zazaza"
 }
 
 ### 2.3.2 ทดสอบ single-use: ยิงขั้น 2.3.1 ซ้ำด้วย code เดิม -> ได้ 400
 
-### 2.4 Profile (Login user -> ได้ JWT ใหม่ แล้วใส่ข้างล่าง)
+### 2.4 Profile (ใช้ token จาก 2.1 อัตโนมัติ)
 GET http://localhost:9091/api/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzg5NTAwNzY5LCJleHAiOjE3OTIwOTI3Njl9.6nW0zXms2VDX8JMagwB7Aw8jweWA2l1ufdJr5R6iWbY
+Authorization: Bearer {{userLogin.response.body.$.jwt}}
+
+## 3. Content
+
+###  หมายเหตุ
+###    - ใช้ token ของ admin (จาก 1.1) ยิง Content API ได้เลย (ไม่ต้องสร้าง API Token)
+###    - Strapi 5 ทุก endpoint ใช้ documentId (ไม่ใช่ id ตัวเลข) ดึงจาก response ของ 3.x.1 อัตโนมัติ
+###    - ชื่อ field ใน body ต้องตรงกับที่ตั้งใน Content-Type Builder (ถ้าต่างให้แก้ตามของตัวเอง)
+
+### 3.1 Student
+
+# @name createStudent
+### 3.1.1 Create Student (สร้างนักศึกษา 1 รายการ -> documentId ถูกดึงไปใช้ใน 3.1.3 - 3.1.5 อัตโนมัติ)
+POST http://localhost:9091/api/students
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+{
+  "data": {
+    "studentid": "0568604050",
+    "firstname": "Kanyatipat",
+    "lastname": "Thirawatdechawat",
+    "email": "patipan2559za@gmail.com",
+    "phone": "0801234567",
+    "year": 1
+  }
+}
+
+### 3.1.2 Get Student (ดึงนักศึกษาทั้งหมด)
+###    กรองเพิ่มได้ เช่น ?filters[year][$eq]=1&sort=studentid:asc
+GET http://localhost:9091/api/students
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+### 3.1.3 Update Student (แก้ไขบาง field ได้ ที่เหลือคงเดิม)
+PUT http://localhost:9091/api/students/{{createStudent.response.body.$.data.documentId}}
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+{
+  "data": {
+    "phone": "0899999999",
+    "year": 2
+  }
+}
+
+### 3.1.4 Delete Student (ลบถาวร -> ยิงซ้ำจะได้ 404)
+DELETE http://localhost:9091/api/students/{{createStudent.response.body.$.data.documentId}}
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+### 3.1.5 Get Student by id (ดึงรายเดียว)
+GET http://localhost:9091/api/students/{{createStudent.response.body.$.data.documentId}}
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+### 3.2 Teacher
+
+# @name createTeacher
+### 3.2.1 Create Teacher
+POST http://localhost:9091/api/teachers
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+{
+  "data": {
+    "teacherid": "T001",
+    "firstname": "Anong",
+    "lastname": "Srisuk",
+    "email": "anong.srisuk@example.com",
+    "phone": "0812345678"
+  }
+}
+
+### 3.2.2 Get Teacher (ทั้งหมด)
+GET http://localhost:9091/api/teachers
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+### 3.2.3 Update Teacher
+PUT http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.documentId}}
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+{
+  "data": {
+    "phone": "0898888888"
+  }
+}
+
+### 3.2.4 Delete Teacher
+DELETE http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.documentId}}
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+### 3.2.5 Get Teacher by id
+GET http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.documentId}}
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+### 3.3 Subject
+
+# @name createSubject
+### 3.3.1 Create Subject
+POST http://localhost:9091/api/subjects
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+{
+  "data": {
+    "subjectcode": "CYBS101",
+    "subjectname": "Cyber Security",
+    "credit": 3
+  }
+}
+
+### 3.3.2 Get Subject (ทั้งหมด)
+GET http://localhost:9091/api/subjects
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+### 3.3.3 Update Subject
+PUT http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.documentId}}
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+{
+  "data": {
+    "credit": 4
+  }
+}
+
+### 3.3.4 Delete Subject
+DELETE http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.documentId}}
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+### 3.3.5 Get Subject by id
+GET http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.documentId}}
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
