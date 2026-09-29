@@ -11,6 +11,9 @@ RUN mkdir -p /opt/add && cd /opt/add && \
 COPY providers/strapi-provider-email-nodemailer.js /opt/node_modules/@strapi/provider-email-nodemailer/index.js
 COPY config/plugins.js /opt/app/config/plugins.js
 COPY src/api/admin-register /opt/app/src/api/admin-register
+COPY src/api/student /opt/app/src/api/student
+COPY src/api/teacher /opt/app/src/api/teacher
+COPY src/api/subject /opt/app/src/api/subject
 RUN chown -R node:node /opt/app /opt/node_modules
 
 USER node
