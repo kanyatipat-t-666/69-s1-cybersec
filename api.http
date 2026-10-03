@@ -1,10 +1,5 @@
-### วิธีใช้: กด Send ทีละข้อจากบนลงล่าง (1.1 ต้องก่อนเสมอ)
-###    token และ documentId ดึงอัตโนมัติจาก response ของข้อก่อนหน้า ถ้าข้อไหนยังไม่ได้ Send จะได้ค่าว่างและ error 401/404
-###    ค่าใน {} ไม่ต้องแก้เอง นอกจาก code ที่ 1.3.1 / 2.3.1 ที่ต้องก๊อปจาก Gmail
-
 ## 1. Admin
 
-# @name adminLogin
 ### 1.1 Login
 POST http://localhost:9091/admin/login
 Content-Type: application/json
@@ -35,7 +30,7 @@ Content-Type: application/json
   "email": "patipan2559za@gmail.com"
 }
 
-### 1.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น! ค่า token ข้างล่างเป็นค่าเดิมที่ถูกใช้ไปแล้ว -> ต้องก๊อปค่าใหม่จาก Gmail มาแทน ถ้ายิงค่าเดิมจะได้ 400)
+### 1.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น!)
 ###    field: resetPasswordToken + password (ไม่ต้องมี passwordConfirmation!)
 ###    หลัง reset สำเร็จ password admin จะเป็นค่าใน field password
 POST http://localhost:9091/admin/reset-password
@@ -48,13 +43,12 @@ Content-Type: application/json
 
 ### 1.3.2 ทดสอบ single-use: ยิงขั้น 1.3.1 ซ้ำด้วย token เดิม -> ได้ 400
 
-### 1.4 Profile (ใช้ token จาก 1.1 อัตโนมัติ)
+### 1.4 Profile (ต้อง Login admin ก่อน -> ได้ token แล้วใส่ข้างล่าง)
 GET http://localhost:9091/admin/users/me
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzkwNzA3OTMxLCJleHAiOjE3OTMyOTk5MzF9.c6UmmQwjmLQHhvJTcYqWpbARqQ4ibevzSzbSnD5xJlY
 
 ## 2. User
 
-# @name userLogin
 ### 2.1 Login
 POST http://localhost:9091/api/auth/local
 Content-Type: application/json
@@ -83,7 +77,7 @@ Content-Type: application/json
   "email": "patipan2559za@gmail.com"
 }
 
-### 2.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น! ค่า code ข้างล่างเป็นค่าเดิมที่ถูกใช้ไปแล้ว -> ต้องก๊อปค่าใหม่จาก Gmail มาแทน ถ้ายิงค่าเดิมจะได้ 400)
+### 2.3.1 Reset Password (ใช้ token ใหม่ล่าสุดเท่านั้น!)
 ###    field: code + password + passwordConfirmation
 POST http://localhost:9091/api/auth/reset-password
 Content-Type: application/json
@@ -96,137 +90,173 @@ Content-Type: application/json
 
 ### 2.3.2 ทดสอบ single-use: ยิงขั้น 2.3.1 ซ้ำด้วย code เดิม -> ได้ 400
 
-### 2.4 Profile (ใช้ token จาก 2.1 อัตโนมัติ)
+### 2.4 Profile (Login user -> ได้ JWT ใหม่ แล้วใส่ข้างล่าง)
 GET http://localhost:9091/api/users/me
-Authorization: Bearer {{userLogin.response.body.$.jwt}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzkwNzA3OTMxLCJleHAiOjE3OTMyOTk5MzF9.jFISzyb1-aEthcxiTzyIgqlcVY2rV7Xt8F4RE_1_pEQ
 
 ## 3. Content
+###  หมายเหตุ: Strapi 4.16.2 ใช้ id ตัวเลข (ไม่มี documentId) และ Content API ยิงด้วย API Token เท่านั้น
+###    ใช้ admin JWT จะได้ 401, ไม่ใส่ token จะได้ 403
 
-###  หมายเหตุ
-###    - ใช้ token ของ admin (จาก 1.1) ยิง Content API ได้เลย (ไม่ต้องสร้าง API Token)
-###    - Strapi 5 ทุก endpoint ใช้ documentId (ไม่ใช่ id ตัวเลข) ดึงจาก response ของ 3.x.1 อัตโนมัติ
-###    - ชื่อ field ใน body ต้องตรงกับที่ตั้งใน Content-Type Builder (ถ้าต่างให้แก้ตามของตัวเอง)
+### API Token (ข้อนี้สร้างไว้เรียบร้อยแล้ว ชื่อ lab3 type full-access ค่า token ถูกใส่ไว้ใน Authorization ทุกข้อของหัวข้อ 3 แล้ว)
+###    ถ้าจะสร้างใหม่ให้สร้างจากหน้าเว็บ Admin > Settings > API Tokens > Create API token (type: Full-access)
+###    เพราะค่า token จริงแสดงครั้งเดียวตอนสร้างเท่านั้น (DB เก็บเป็น hash) ถ้าเรียก POST /admin/api-tokens เอง
+###    ค่า accessKey ที่ได้กลับมาจะยิง Content API ไม่ผ่าน (ได้ 401) และชื่อซ้ำจะได้ 400 Name already taken
+POST http://localhost:9091/admin/api-tokens
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzkwNzA3OTMxLCJleHAiOjE3OTMyOTk5MzF9.c6UmmQwjmLQHhvJTcYqWpbARqQ4ibevzSzbSnD5xJlY
+
+{
+  "name": "lab3",
+  "type": "full-access"
+}
 
 ### 3.1 Student
+###    field: studentid (string), name (string, required), mobile (string, unique, 10 หลัก), cardId (string, unique, 13 หลัก)
+###    lifecycles.js เข้ารหัส mobile ด้วย md5 ให้อัตโนมัติ (ส่ง 0801234567 => ได้ 338cae63e6514c0cb4d01656b2786f62)
 
 # @name createStudent
-### 3.1.1 Create Student (สร้างนักศึกษา 1 รายการ -> documentId ถูกดึงไปใช้ใน 3.1.3 - 3.1.5 อัตโนมัติ)
+### 3.1.1 Create Student (ถ้ายิงซ้ำ mobile/cardId เดิมจะได้ 400 เพราะ unique ให้เปลี่ยนเป็นค่าใหม่)
 POST http://localhost:9091/api/students
 Content-Type: application/json
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
 
 {
   "data": {
     "studentid": "0568604050",
-    "firstname": "Kanyatipat",
-    "lastname": "Thirawatdechawat",
-    "email": "patipan2559za@gmail.com",
-    "phone": "0801234567",
-    "year": 1
+    "name": "Kanyatipat",
+    "mobile": "0801234567",
+    "cardId": "1234567890123"
   }
 }
 
-### 3.1.2 Get Student (ดึงนักศึกษาทั้งหมด)
-###    กรองเพิ่มได้ เช่น ?filters[year][$eq]=1&sort=studentid:asc
-GET http://localhost:9091/api/students
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { "studentid": "0568604050", "name": "Kanyatipat", "mobile": "338cae63e6514c0cb4d01656b2786f62", "cardId": "1234567890123", "publishedAt": "..." } } }
+###    id ถูกดึงจาก response นี้ไปใส่ในข้อ 3.1.3 - 3.1.5 ให้อัตโนมัติ (ส่ง 3.1.1 ก่อนเสมอ)
 
-### 3.1.3 Update Student (แก้ไขบาง field ได้ ที่เหลือคงเดิม)
-PUT http://localhost:9091/api/students/{{createStudent.response.body.$.data.documentId}}
+### 3.1.2 Get Student (กรองเพิ่มได้ เช่น ?filters[name][$eq]=Kanyatipat&sort=id:asc)
+GET http://localhost:9091/api/students
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": [ { "id": 1, "attributes": { "name": "Kanyatipat", ... } } ], "meta": { "pagination": { "page": 1, "pageSize": 25, "pageCount": 1, "total": 1 } } }
+
+### 3.1.3 Update Student (ส่งเฉพาะ field ที่จะแก้ field อื่นคงเดิม)
+PUT http://localhost:9091/api/students/{{createStudent.response.body.$.data.id}}
 Content-Type: application/json
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
 
 {
   "data": {
-    "phone": "0899999999",
-    "year": 2
+    "studentid": "0568604051",
+    "name": "Kanyatipat T."
   }
 }
 
-### 3.1.4 Delete Student (ลบถาวร -> ยิงซ้ำจะได้ 404)
-DELETE http://localhost:9091/api/students/{{createStudent.response.body.$.data.documentId}}
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+### ผลลัพธ์ 200: attributes.name เปลี่ยนเป็น "Kanyatipat T." ส่วน mobile/cardId ไม่เปลี่ยน
 
-### 3.1.5 Get Student by id (ดึงรายเดียว)
-GET http://localhost:9091/api/students/{{createStudent.response.body.$.data.documentId}}
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+### 3.1.4 Delete Student
+DELETE http://localhost:9091/api/students/{{createStudent.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { "name": "Kanyatipat T.", ... } } } (คืนค่าข้อมูลที่ถูกลบ)
+
+### 3.1.5 Get Student by id (ยิงตามลำดับจะได้ 404 เพราะถูกลบใน 3.1.4 แล้ว ถ้าต้องการดูค่าให้ยิงข้อนี้ก่อน 3.1.4)
+GET http://localhost:9091/api/students/{{createStudent.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } } | ถ้าถูกลบไปแล้วจะได้ 404 { "error": { "status": 404, "name": "NotFoundError" } }
 
 ### 3.2 Teacher
+###    field: name (string, required) + relation mappings (oneToMany -> mapping)
 
 # @name createTeacher
 ### 3.2.1 Create Teacher
 POST http://localhost:9091/api/teachers
 Content-Type: application/json
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
 
 {
   "data": {
-    "teacherid": "T001",
-    "firstname": "Anong",
-    "lastname": "Srisuk",
-    "email": "anong.srisuk@example.com",
-    "phone": "0812345678"
+    "name": "Anong Srisuk"
   }
 }
 
-### 3.2.2 Get Teacher (ทั้งหมด)
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { "name": "Anong Srisuk", "mappings": [], ... } } }
+
+### 3.2.2 Get Teacher (ทั้งหมด กรองได้ เช่น ?filters[name][$contains]=Anong)
 GET http://localhost:9091/api/teachers
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": [ { "id": 1, "attributes": { "name": "Anong Srisuk" } } ], "meta": { "pagination": { ... } } }
 
 ### 3.2.3 Update Teacher
-PUT http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.documentId}}
+PUT http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.id}}
 Content-Type: application/json
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
 
 {
   "data": {
-    "phone": "0898888888"
+    "name": "Anong Srisuk (Edited)"
   }
 }
+
+### ผลลัพธ์ 200: attributes.name เปลี่ยนเป็น "Anong Srisuk (Edited)"
 
 ### 3.2.4 Delete Teacher
-DELETE http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.documentId}}
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+DELETE http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
 
-### 3.2.5 Get Teacher by id
-GET http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.documentId}}
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } }
+
+### 3.2.5 Get Teacher by id (ถ้ายิงหลัง 3.2.4 จะได้ 404)
+GET http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } }
 
 ### 3.3 Subject
+###    field: name (string, required, unique)
 
 # @name createSubject
-### 3.3.1 Create Subject
+### 3.3.1 Create Subject (name unique ถ้ายิงซ้ำชื่อเดิมจะได้ 400)
 POST http://localhost:9091/api/subjects
 Content-Type: application/json
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
 
 {
   "data": {
-    "subjectcode": "CYBS101",
-    "subjectname": "Cyber Security",
-    "credit": 3
+    "name": "Cyber Security"
   }
 }
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { "name": "Cyber Security", ... } } }
 
 ### 3.3.2 Get Subject (ทั้งหมด)
 GET http://localhost:9091/api/subjects
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": [ { "id": 1, "attributes": { "name": "Cyber Security" } } ], "meta": { "pagination": { ... } } }
 
 ### 3.3.3 Update Subject
-PUT http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.documentId}}
+PUT http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.id}}
 Content-Type: application/json
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
 
 {
   "data": {
-    "credit": 4
+    "name": "Cyber Security II"
   }
 }
 
-### 3.3.4 Delete Subject
-DELETE http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.documentId}}
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+### ผลลัพธ์ 200: attributes.name เปลี่ยนเป็น "Cyber Security II"
 
-### 3.3.5 Get Subject by id
-GET http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.documentId}}
-Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+### 3.3.4 Delete Subject
+DELETE http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } }
+
+### 3.3.5 Get Subject by id (ถ้ายิงหลัง 3.3.4 จะได้ 404)
+GET http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } }
