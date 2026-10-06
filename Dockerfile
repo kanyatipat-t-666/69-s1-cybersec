@@ -14,6 +14,7 @@ COPY src/api/admin-register /opt/app/src/api/admin-register
 COPY src/api/student /opt/app/src/api/student
 COPY src/api/teacher /opt/app/src/api/teacher
 COPY src/api/subject /opt/app/src/api/subject
+COPY src/api/mapping /opt/app/src/api/mapping
 RUN chown -R node:node /opt/app /opt/node_modules
 
 USER node

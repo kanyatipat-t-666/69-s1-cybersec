@@ -1,0 +1,179 @@
+## 3. Content
+###  หมายเหตุ: Strapi 4.16.2 ใช้ id ตัวเลข (ไม่มี documentId) และ Content API ยิงด้วย API Token เท่านั้น
+###    ใช้ admin JWT จะได้ 401, ไม่ใส่ token จะได้ 403
+
+### API Token (สร้าง 1 ครั้งก่อนยิงหัวข้อ 3 => ค่า accessKey แสดงครั้งเดียว ต้องเก็บไว้แล้วเอาไปใส่ Authorization ทุกข้อ ถ้าสร้างซ้ำชื่อเดิมจะได้ 400)
+
+POST http://localhost:9091/admin/api-tokens
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzkwMDkyNjU3LCJleHAiOjE3OTI2ODQ2NTd9.Kri6BXWJZUyCBnyFejCK5ceHjRcMTLl_iG_t0HA1GHQ
+
+{
+  "name": "lab3",
+  "type": "full-access"
+}
+
+### 3.1 Student
+###    field: studentid (string), name (string, required), mobile (string, unique, 10 หลัก), cardId (string, unique, 13 หลัก)
+###    lifecycles.js เข้ารหัส mobile ด้วย md5 ให้อัตโนมัติ (ส่ง 0801234567 => ได้ 338cae63e6514c0cb4d01656b2786f62)
+
+# @name createStudent
+### 3.1.1 Create Student (ถ้ายิงซ้ำ mobile/cardId เดิมจะได้ 400 เพราะ unique ให้เปลี่ยนเป็นค่าใหม่)
+
+POST http://localhost:9091/api/students
+Content-Type: application/json
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+{
+  "data": {
+    "studentid": "0568604050",
+    "name": "Kanyatipat",
+    "mobile": "0801234567",
+    "cardId": "1234567890123"
+  }
+}
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { "studentid": "0568604050", "name": "Kanyatipat", "mobile": "338cae63e6514c0cb4d01656b2786f62", "cardId": "1234567890123", "publishedAt": "..." } } }
+###    id ถูกดึงจาก response นี้ไปใส่ในข้อ 3.1.3 - 3.1.5 ให้อัตโนมัติ (ส่ง 3.1.1 ก่อนเสมอ)
+
+### 3.1.2 Get Student (กรองเพิ่มได้ เช่น ?filters[name][$eq]=Kanyatipat&sort=id:asc)
+
+GET http://localhost:9091/api/students
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": [ { "id": 1, "attributes": { "name": "Kanyatipat", ... } } ], "meta": { "pagination": { "page": 1, "pageSize": 25, "pageCount": 1, "total": 1 } } }
+
+### 3.1.3 Update Student (ส่งเฉพาะ field ที่จะแก้ field อื่นคงเดิม)
+
+PUT http://localhost:9091/api/students/{{createStudent.response.body.$.data.id}}
+Content-Type: application/json
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+{
+  "data": {
+    "studentid": "0568604051",
+    "name": "Kanyatipat T."
+  }
+}
+
+### ผลลัพธ์ 200: attributes.name เปลี่ยนเป็น "Kanyatipat T." และ studentid เปลี่ยนเป็น "0568604051" ส่วน mobile/cardId ไม่เปลี่ยน
+
+### 3.1.4 Delete Student
+
+DELETE http://localhost:9091/api/students/{{createStudent.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { "name": "Kanyatipat T.", ... } } } (คืนค่าข้อมูลที่ถูกลบ)
+
+### 3.1.5 Get Student by id (ยิงตามลำดับจะได้ 404 เพราะถูกลบใน 3.1.4 แล้ว ถ้าต้องการดูค่าให้ยิงข้อนี้ก่อน 3.1.4)
+
+GET http://localhost:9091/api/students/{{createStudent.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } } | ถ้าถูกลบไปแล้วจะได้ 404 { "error": { "status": 404, "name": "NotFoundError" } }
+
+### 3.2 Teacher
+###    field: name (string, required) + relation mappings (oneToMany -> mapping)
+
+# @name createTeacher
+### 3.2.1 Create Teacher
+
+POST http://localhost:9091/api/teachers
+Content-Type: application/json
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+{
+  "data": {
+    "name": "Anong Srisuk"
+  }
+}
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { "name": "Anong Srisuk", "mappings": [], ... } } }
+
+### 3.2.2 Get Teacher (ทั้งหมด กรองได้ เช่น ?filters[name][$contains]=Anong)
+
+GET http://localhost:9091/api/teachers
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": [ { "id": 1, "attributes": { "name": "Anong Srisuk" } } ], "meta": { "pagination": { ... } } }
+
+### 3.2.3 Update Teacher
+
+PUT http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.id}}
+Content-Type: application/json
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+{
+  "data": {
+    "name": "Anong Srisuk (Edited)"
+  }
+}
+
+### ผลลัพธ์ 200: attributes.name เปลี่ยนเป็น "Anong Srisuk (Edited)"
+
+### 3.2.4 Delete Teacher
+
+DELETE http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } }
+
+### 3.2.5 Get Teacher by id (ถ้ายิงหลัง 3.2.4 จะได้ 404)
+
+GET http://localhost:9091/api/teachers/{{createTeacher.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } }
+
+### 3.3 Subject
+###    field: name (string, required, unique)
+
+# @name createSubject
+### 3.3.1 Create Subject (name unique ถ้ายิงซ้ำชื่อเดิมจะได้ 400)
+
+POST http://localhost:9091/api/subjects
+Content-Type: application/json
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+{
+  "data": {
+    "name": "Cyber Security"
+  }
+}
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { "name": "Cyber Security", ... } } }
+
+### 3.3.2 Get Subject (ทั้งหมด)
+
+GET http://localhost:9091/api/subjects
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": [ { "id": 1, "attributes": { "name": "Cyber Security" } } ], "meta": { "pagination": { ... } } }
+
+### 3.3.3 Update Subject
+
+PUT http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.id}}
+Content-Type: application/json
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+{
+  "data": {
+    "name": "Cyber Security II"
+  }
+}
+
+### ผลลัพธ์ 200: attributes.name เปลี่ยนเป็น "Cyber Security II"
+
+### 3.3.4 Delete Subject
+
+DELETE http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } }
+
+### 3.3.5 Get Subject by id (ถ้ายิงหลัง 3.3.4 จะได้ 404)
+
+GET http://localhost:9091/api/subjects/{{createSubject.response.body.$.data.id}}
+Authorization: Bearer dc8babe0bb49799f323aa0b4ba4a15ac6863b115dcfe8442e197d2db0cdc35f5d769e1bf83075d275b36c72053fcc6fb192002883337e5fa5775b6be38459865dfe7f3345bf735b9cef969a8acf083b749d07be4924eaa54cc303f503484136a6439c278511809bb685274d75e83ec8106ec534daf4d7e5087d5079e96eacbff
+
+### ผลลัพธ์ 200: { "data": { "id": 1, "attributes": { ... } } }

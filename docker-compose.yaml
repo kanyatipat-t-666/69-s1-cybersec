@@ -57,3 +57,5 @@ services:
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - SMTP_FROM=${SMTP_FROM:-strapi@localhost}
+      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET:-}
+      - APP_KEYS=${APP_KEYS:-}

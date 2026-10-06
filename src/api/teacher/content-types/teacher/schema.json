@@ -4,31 +4,22 @@
   "info": {
     "singularName": "teacher",
     "pluralName": "teachers",
-    "displayName": "Teacher",
-    "description": "ข้อมูลอาจารย์"
+    "displayName": "Teacher"
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
-    "teacherid": {
+    "name": {
       "type": "string",
       "required": true
     },
-    "firstname": {
-      "type": "string",
-      "required": true
-    },
-    "lastname": {
-      "type": "string",
-      "required": true
-    },
-    "email": {
-      "type": "email"
-    },
-    "phone": {
-      "type": "string"
+    "mappings": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::mapping.mapping",
+      "mappedBy": "teacher"
     }
   }
 }

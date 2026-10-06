@@ -4,27 +4,17 @@
   "info": {
     "singularName": "subject",
     "pluralName": "subjects",
-    "displayName": "Subject",
-    "description": "ข้อมูลวิชา"
+    "displayName": "Subject"
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
-    "subjectcode": {
+    "name": {
       "type": "string",
-      "required": true
-    },
-    "subjectname": {
-      "type": "string",
-      "required": true
-    },
-    "credit": {
-      "type": "integer",
-      "min": 0,
-      "max": 12,
-      "default": 3
+      "required": true,
+      "unique": true
     }
   }
 }

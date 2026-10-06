@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "reservations",
+  "info": {
+    "singularName": "reservation",
+    "pluralName": "reservations",
+    "displayName": "Reservation",
+    "description": "Dormitory room reservation (id_card and phone are stored encrypted with AES-256-GCM)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "room_no": {
+      "type": "string",
+      "required": true,
+      "maxLength": 10
+    },
+    "building": {
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    "tenant_name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "id_card": {
+      "type": "text",
+      "required": true
+    },
+    "phone": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "monthly_rent": {
+      "type": "integer",
+      "required": true
+    },
+    "start_date": {
+      "type": "date",
+      "required": true
+    },
+    "end_date": {
+      "type": "date"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "confirmed", "cancelled"],
+      "default": "pending",
+      "required": true
+    },
+    "record_hash": {
+      "type": "string",
+      "maxLength": 32
+    }
+  }
+}
